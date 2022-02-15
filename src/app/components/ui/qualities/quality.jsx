@@ -1,18 +1,23 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { useQualities } from "../../../hooks/useQualities";
-const Quality = ({ id }) => {
-    const { getQuality } = useQualities();
-    const { _id, color, name } = getQuality(id);
-    return (
-        <span className={"badge m-1 bg-" + color} key={_id}>
-            {name}
-        </span>
-    );
-    // return "something";
-};
-Quality.propTypes = {
-    id: PropTypes.string.isRequired
+import { useSelector } from "react-redux";
+import {
+    getQualities,
+    getQualitiesLoadingStatus
+} from "../../../store/qualities";
+
+const Qualitie = ({ id }) => {
+    const qualities = useSelector(getQualities());
+    const isLoading = useSelector(getQualitiesLoadingStatus());
+
+    const qual = (id) => qualities.find((q) => q._id === id);
+
+    if (!isLoading) {
+        return <span className={"badge bg-" + qual.color}>{qual.name}</span>;
+    } else return "Loading";
 };
 
-export default Quality;
+Qualitie.propTypes = {
+    id: PropTypes.string
+};
+export default Qualitie;

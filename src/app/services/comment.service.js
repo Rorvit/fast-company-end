@@ -1,16 +1,17 @@
-import httpService from "./http.service";
-const commentEndpoint = "comment/";
+import httpServices from "./http.services";
+
+const commentEndPoint = "comment/";
 
 const commentService = {
     createComment: async (payload) => {
-        const { data } = await httpService.put(
-            commentEndpoint + payload._id,
+        const { data } = await httpServices.put(
+            commentEndPoint + payload._id,
             payload
         );
         return data;
     },
     getComments: async (pageId) => {
-        const { data } = await httpService.get(commentEndpoint, {
+        const { data } = await httpServices.get(commentEndPoint, {
             params: {
                 orderBy: '"pageId"',
                 equalTo: `"${pageId}"`
@@ -19,7 +20,7 @@ const commentService = {
         return data;
     },
     removeComment: async (commentId) => {
-        const { data } = await httpService.delete(commentEndpoint + commentId);
+        const { data } = await httpServices.delete(commentEndPoint + commentId);
         return data;
     }
 };

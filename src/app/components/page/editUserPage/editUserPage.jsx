@@ -1,59 +1,71 @@
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { validator } from "../../../utils/ validator";
+import { validator } from "../../../utils/validator";
 import TextField from "../../common/form/textField";
 import SelectField from "../../common/form/selectField";
-import RadioField from "../../common/form/radio.Field";
+import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
 import BackHistoryButton from "../../common/backButton";
-import { useAuth } from "../../../hooks/useAuth";
-import { useProfessions } from "../../../hooks/useProfession";
-import { useQualities } from "../../../hooks/useQualities";
+import { useSelector, useDispatch } from "react-redux";
+import {
+    getQualities,
+    getQualitiesLoadingStatus
+} from "../../../store/qualities";
+import {
+    getProfessions,
+    getProfessionsLoadingStatus
+} from "../../../store/professions";
+import { getCurrentUserData, updateUserData } from "../../../store/users";
 
 const EditUserPage = () => {
-    const history = useHistory();
+    const dispatch = useDispatch();
     const [isLoading, setIsLoading] = useState(true);
-    const { currentUser, updateUser } = useAuth();
+
+    const currentUser = useSelector(getCurrentUserData());
     const [data, setData] = useState();
-    const { professions, isLoading: profsLoading } = useProfessions();
-    const { qualities, isLoading: qualsLoading } = useQualities();
+    const qualities = useSelector(getQualities());
+    const professions = useSelector(getProfessions());
+
+    const qualsLoading = useSelector(getQualitiesLoadingStatus());
+    const profsLoading = useSelector(getProfessionsLoadingStatus());
     const [errors, setErrors] = useState({});
 
-    const getQualities = (elements) => {
-        const qualitiesQrray = [];
-        for (const elem of elements) {
-            for (const qualy in qualities) {
-                if (elem.value === qualities[qualy]._id) {
-                    qualitiesQrray.push(qualities[qualy]);
-                }
-            }
-        }
-        return qualitiesQrray;
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const isValid = validate();
-        if (!isValid) return;
-        updateUser({
-            ...data,
-            qualities: data.qualities.map((quality) => quality.value)
-        });
-        history.push(`/users/${currentUser._id}`);
-    };
-
-    const transformData = (data) => {
-        return data.map((qual) => ({ label: qual.name, value: qual._id }));
+    const transformData = (dataList) => {
+        return dataList.map((el) => ({ label: el.name, value: el._id }));
     };
 
     const professionsList = transformData(professions);
     const qualitiesList = transformData(qualities);
 
+    const getQualitiesList = (qualIds) => {
+        const qualitiesArray = [];
+        for (const qid of qualIds) {
+            for (const quality of qualities) {
+                if (quality._id === qid) {
+                    qualitiesArray.push(quality);
+                    break;
+                }
+            }
+        }
+        return qualitiesArray;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const isValid = validate();
+        if (!isValid) return;
+        dispatch(
+            updateUserData({
+                ...data,
+                qualities: data.qualities.map((quality) => quality.value)
+            })
+        );
+    };
+
     useEffect(() => {
         if (!qualsLoading && !profsLoading && currentUser && !data) {
             setData({
                 ...currentUser,
-                qualities: getQualities(currentUser.qualities)
+                qualities: getQualitiesList(currentUser.qualities)
             });
         }
     }, [profsLoading, qualsLoading, currentUser, data]);
@@ -78,18 +90,22 @@ const EditUserPage = () => {
             }
         }
     };
+
     useEffect(() => validate(), [data]);
+
     const handleChange = (target) => {
         setData((prevState) => ({
             ...prevState,
             [target.name]: target.value
         }));
     };
+
     const validate = () => {
         const errors = validator(data, validatorConfog);
         setErrors(errors);
         return Object.keys(errors).length === 0;
     };
+
     const isValid = Object.keys(errors).length === 0;
 
     return (

@@ -1,23 +1,24 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 const TableHeader = ({ onSort, selectedSort, columns }) => {
     const handleSort = (item) => {
         if (selectedSort.path === item) {
-            onSort({
+            onSort((selectedSort) => ({
                 ...selectedSort,
                 order: selectedSort.order === "asc" ? "desc" : "asc"
-            });
+            }));
         } else {
             onSort({ path: item, order: "asc" });
         }
     };
-    const rendeSortArrow = (selectedSort, currentPath) => {
-        if (selectedSort.path === currentPath) {
-            if (selectedSort.order === "asc") {
-                return <i className="bi bi-caret-down-fill"></i>;
-            } else {
-                return <i className="bi bi-caret-up-fill"></i>;
-            }
+    const renderSortIcon = (item) => {
+        if (selectedSort.path === item) {
+            const result =
+                selectedSort.order === "asc"
+                    ? "bi bi-caret-down-fill"
+                    : "bi bi-caret-up-fill";
+            return <i className={result}></i>;
         }
         return null;
     };
@@ -36,8 +37,9 @@ const TableHeader = ({ onSort, selectedSort, columns }) => {
                         {...{ role: columns[column].path && "button" }}
                         scope="col"
                     >
-                        {columns[column].name}{" "}
-                        {rendeSortArrow(selectedSort, columns[column].path)}
+                        {columns[column].name}
+                        {columns[column].path &&
+                            renderSortIcon(columns[column].path)}
                     </th>
                 ))}
             </tr>
@@ -46,8 +48,7 @@ const TableHeader = ({ onSort, selectedSort, columns }) => {
 };
 TableHeader.propTypes = {
     onSort: PropTypes.func.isRequired,
-    selectedSort: PropTypes.object.isRequired,
+    selectedSort: PropTypes.object,
     columns: PropTypes.object.isRequired
 };
-
 export default TableHeader;

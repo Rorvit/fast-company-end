@@ -15,6 +15,8 @@ const Table = ({ onSort, selectedSort, columns, data, children }) => {
         </table>
     );
 };
+
+export default Table;
 Table.propTypes = {
     onSort: PropTypes.func,
     selectedSort: PropTypes.object,
@@ -22,5 +24,3 @@ Table.propTypes = {
     data: PropTypes.array,
     children: PropTypes.array
 };
-
-export default Table;
