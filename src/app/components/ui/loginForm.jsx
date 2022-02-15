@@ -1,77 +1,77 @@
-import React, { useEffect, useState } from "react";
-import { validator } from "../../utils/ validator";
+import React, { useState, useEffect } from "react";
+import { validator } from "../../utils/validator";
 import TextField from "../common/form/textField";
 import CheckBoxField from "../common/form/checkBoxField";
-import { useAuth } from "../../hooks/useAuth";
 import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getAuthErrors, logIn } from "../../store/users";
 
 const LoginForm = () => {
+    const history = useHistory();
+
     const [data, setData] = useState({
         email: "",
         password: "",
         stayOn: false
     });
-    const history = useHistory();
-    const { logIn } = useAuth();
+    const dispatch = useDispatch();
     const [errors, setErrors] = useState({});
-    const [enterError, setEnterError] = useState(null);
+
+    const loginError = useSelector(getAuthErrors());
+
     const handleChange = (target) => {
-        setData((prevState) => ({
-            ...prevState,
-            [target.name]: target.value
-        }));
-        setEnterError(null);
+        setData((prevState) => ({ ...prevState, [target.name]: target.value }));
     };
 
-    const validatorConfog = {
+    const validatorConfig = {
         email: {
             isRequired: {
                 message: "Электронная почта обязательна для заполнения"
             }
         },
         password: {
-            isRequired: {
-                message: "Пароль обязателкн для заполнения"
-            }
+            isRequired: { message: "Пароль обязателен для заполнения" }
         }
     };
-    useEffect(() => {
-        validate();
-    }, [data]);
+
+    useEffect(() => validate(), [data]);
+
     const validate = () => {
-        const errors = validator(data, validatorConfog);
+        const errors = validator(data, validatorConfig);
+
         setErrors(errors);
         return Object.keys(errors).length === 0;
     };
     const isValid = Object.keys(errors).length === 0;
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
+        const redirect = history.location.state
+            ? `${history.location.state.from.pathname}`
+            : "/";
+        console.log(data);
+        dispatch(logIn({ payload: data, redirect }));
 
-        try {
-            await logIn(data);
-            history.push(
-                history.location.state
-                    ? history.location.state.from.pathname
-                    : "/"
-            );
-        } catch (error) {
-            setEnterError(error.message);
-        }
+        history.push(
+            history.location.state
+                ? `${history.location.state.from.pathname}`
+                : "/"
+        );
     };
+
     return (
         <form onSubmit={handleSubmit}>
             <TextField
-                label="Электронная почта"
+                label="Введите емаил"
                 name="email"
                 value={data.email}
                 onChange={handleChange}
                 error={errors.email}
             />
             <TextField
-                label="Пароль"
+                label="Введите пароль"
                 type="password"
                 name="password"
                 value={data.password}
@@ -79,19 +79,19 @@ const LoginForm = () => {
                 error={errors.password}
             />
             <CheckBoxField
+                name="stayOn"
                 value={data.stayOn}
                 onChange={handleChange}
-                name="stayOn"
             >
                 Оставаться в системе
             </CheckBoxField>
-            {enterError && <p className="text-danger">{enterError}</p>}
+            {loginError && <p className="text-danger">{loginError}</p>}
             <button
                 type="submit"
-                disabled={!isValid || enterError}
+                disabled={!isValid}
                 className="btn btn-primary w-100 mx-auto"
             >
-                Submit
+                Отправить
             </button>
         </form>
     );

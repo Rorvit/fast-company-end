@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import professions from "../mockData/professions.json";
 import qualities from "../mockData/qualities.json";
 import users from "../mockData/users.json";
-import httpService from "../services/http.service";
+import httpService from "../services/http.services";
 
 const useMockData = () => {
     const statusConsts = {

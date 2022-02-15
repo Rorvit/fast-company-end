@@ -1,20 +1,20 @@
 import React from "react";
 import PropTypes from "prop-types";
-
 import BookMark from "../common/bookmark";
-import Qualities from "./qualities";
-import Table from "../common/table";
 import { Link } from "react-router-dom";
+import Table from "../common/table";
 import Profession from "./profession";
+import QualitiesList from "./qualities";
 
 const UserTable = ({
     users,
     onSort,
     selectedSort,
-    onToggleBookMark,
+    onToggleBookmark,
     ...rest
 }) => {
     const columns = {
+        count: {},
         name: {
             path: "name",
             name: "Имя",
@@ -24,7 +24,7 @@ const UserTable = ({
         },
         qualities: {
             name: "Качества",
-            component: (user) => <Qualities qualities={user.qualities} />
+            component: (user) => <QualitiesList ids={user.qualities} />
         },
         professions: {
             name: "Профессия",
@@ -41,12 +41,23 @@ const UserTable = ({
             component: (user) => (
                 <BookMark
                     status={user.bookmark}
-                    onClick={() => onToggleBookMark(user._id)}
+                    onClick={() => onToggleBookmark(user._id, user.bookmark)}
                 />
             )
         }
     };
     return (
+        //
+        //   <Table
+        //     onSort={onSort}
+        //     selectedSort={selectedSort}
+        //     columns={columns}
+        //     data={users}
+        //   />
+        //   {/* <TableHeader {...{ onSort, selectedSort, columns }} />
+        //   <TableBody {...{ columns, data: users }} /> */}
+        //
+
         <Table
             onSort={onSort}
             selectedSort={selectedSort}
@@ -55,12 +66,11 @@ const UserTable = ({
         />
     );
 };
-
+export default UserTable;
 UserTable.propTypes = {
     users: PropTypes.array.isRequired,
+    handleSort: PropTypes.func,
+    selectedSort: PropTypes.object,
     onSort: PropTypes.func.isRequired,
-    selectedSort: PropTypes.object.isRequired,
-    onToggleBookMark: PropTypes.func.isRequired
+    onToggleBookmark: PropTypes.func.isRequired
 };
-
-export default UserTable;

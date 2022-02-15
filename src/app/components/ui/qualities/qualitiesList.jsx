@@ -1,22 +1,31 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Quality from "./quality";
-import { useQualities } from "../../../hooks/useQualities";
+import { useSelector } from "react-redux";
+import {
+    getQualitiesLoadingStatus,
+    getQualitiesByIds
+} from "../../../store/qualities";
 
-const QualitiesList = ({ qualities }) => {
-    const { isLoading } = useQualities();
-    if (isLoading) return "Loadind ...";
-    return (
-        <>
-            {qualities.map((qual) => (
-                <Quality key={qual} id={qual} />
-            ))}
-        </>
-    );
+const QualitiesList = ({ ids }) => {
+    const qualsLoading = useSelector(getQualitiesLoadingStatus());
+    const qualsArray = useSelector(getQualitiesByIds(ids));
+
+    if (!qualsLoading) {
+        return (
+            <>
+                {qualsArray.map((qual) => (
+                    <span key={qual._id} className={"badge bg-" + qual.color}>
+                        {qual.name}
+                    </span>
+                ))}
+            </>
+        );
+    } else {
+        return "Loading...";
+    }
 };
-
 QualitiesList.propTypes = {
-    qualities: PropTypes.array
+    ids: PropTypes.array
 };
 
 export default QualitiesList;
